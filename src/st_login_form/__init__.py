@@ -6,6 +6,8 @@ from supabase import Client, create_client
 __version__ = "0.2.1"
 
 
+st.title("ImmoScope")
+
 #@st.cache_resource
 #def init_connection() -> Client:
 #    try:
