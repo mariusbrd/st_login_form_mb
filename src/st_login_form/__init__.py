@@ -6,7 +6,18 @@ __version__ = "0.2.1"
 
 @st.cache_resource
 def init_connection() -> Client:
-    return create_client(st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"])
+    try:
+        SUPABASE_URL = st.secrets["SUPABASE_URL"]
+        SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    except:
+        SUPABASE_URL = os.eniron.get("SUPABASE_URL")
+        SUPABASE_KEY = os.eniron.get("SUPABASE_KEY")
+        
+
+
+
+    
+    return create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 def login_success(message: str, username: str) -> None:
