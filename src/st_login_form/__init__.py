@@ -3,56 +3,27 @@ import streamlit as st
 from supabase import Client, create_client 
 import re
 
-
 __version__ = "0.2.1"
-
-
-
-#@st.cache_resource
-#def init_connection() -> Client:
-#    try:
-#        SUPABASE_URL = st.secrets["SUPABASE_URL"]
-#        SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-#    except:
-#        SUPABASE_URL = os.environ.get("SUPABASE_URL")
-#        SUPABASE_KEY = os.environ.get("SUPABASE_KEY")#
-#
-#    return create_client(SUPABASE_URL, SUPABASE_KEY)
 
 @st.cache_resource
 def init_connection() -> Client:
-    # Try to get values from st.secrets
-    SUPABASE_URL = st.secrets.get("SUPABASE_URL")
-    SUPABASE_KEY = st.secrets.get("SUPABASE_KEY")
+    SUPABASE_URL = st.secrets.get("SUPABASE_URL", os.environ.get("SUPABASE_URL"))
+    SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", os.environ.get("SUPABASE_KEY"))
 
-    # If either value is None, use environment variables
-    if SUPABASE_URL is None or SUPABASE_KEY is None:
-        SUPABASE_URL = os.environ.get("SUPABASE_URL")
-        SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-
-    # Ensure both SUPABASE_URL and SUPABASE_KEY are not None
     if SUPABASE_URL is None or SUPABASE_KEY is None:
         raise ValueError("Supabase credentials not found in secrets or environment variables")
 
     return create_client(SUPABASE_URL, SUPABASE_KEY)
 
-
-
-
-
 def is_valid_email(email: str) -> bool:
     pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return re.match(pattern, email) is not None
-
-
 
 def login_success(message: str, username: str) -> None:
     st.success(message)
     st.session_state["authenticated"] = True
     st.session_state["username"] = username
 
-
-# Create the python function that will be called
 def login_form(
     title: str = "ImmoScope Benutzer-Verwaltung",
     user_tablename: str = "users",
@@ -81,20 +52,8 @@ def login_form(
     login_error_message: str = "Falscher Benutzername/Passwort :x: ",
     guest_submit_label: str = "Anmeldung als Gast",
 ) -> Client:
-    """Creates a user login form in Streamlit apps.
-
-    Connects to a Supabase DB using `SUPABASE_URL` and `SUPABASE_KEY` Streamlit secrets.
-    Sets `session_state["authenticated"]` to True if the login is successful.
-    Sets `session_state["username"]` to provided username or new or existing user, and to `None` for guest login.
-
-    Returns:
-    Supabase client instance
-    """
-
-    # Initialize supabase connection
     client = init_connection()
 
-    # User Authentication
     if "authenticated" not in st.session_state:
         st.session_state["authenticated"] = False
 
@@ -103,123 +62,51 @@ def login_form(
 
     with st.expander(title, expanded=not st.session_state["authenticated"]):
         if allow_guest:
-            create_tab, login_tab, guest_tab = st.tabs(
-                [
-                    create_title,
-                    login_title,
-                    guest_title,
-                ]
-            )
+            create_tab, login_tab, guest_tab = st.tabs([create_title, login_title, guest_title])
         else:
-            create_tab, login_tab = st.tabs(
-                [
-                    create_title,
-                    login_title,
-                ]
-            )
+            create_tab, login_tab = st.tabs([create_title, login_title])
 
-        # Create new account
-        # Create new account
         with create_tab:
             with st.form(key="create"):
-                username = st.text_input(
-                    label=create_username_label,
-                    placeholder=create_username_placeholder,
-                    help=create_username_help,
-                    disabled=st.session_state["authenticated"],
-                )
-        
-                password = st.text_input(
-                    label=create_password_label,
-                    placeholder=create_password_placeholder,
-                    help=create_password_help,
-                    type="password",
-                    disabled=st.session_state["authenticated"],
-                )
-        
-                # Überprüfen, ob die Schaltfläche zum Erstellen eines Kontos gedrückt wurde
-                create_account_clicked = st.form_submit_button(
-                    label=create_submit_label,
-                    type="primary",
-                    disabled=st.session_state["authenticated"],
-                )
-        
-                # Überprüfen, ob die E-Mail gültig ist und die Schaltfläche gedrückt wurde
+                username = st.text_input(label=create_username_label, placeholder=create_username_placeholder, help=create_username_help, disabled=st.session_state["authenticated"])
+                password = st.text_input(label=create_password_label, placeholder=create_password_placeholder, help=create_password_help, type="password", disabled=st.session_state["authenticated"])
+                create_account_clicked = st.form_submit_button(label=create_submit_label, type="primary", disabled=st.session_state["authenticated"])
+
                 if create_account_clicked:
-                    if not is_valid_email(username):
-                        st.error("Please enter a valid email address.")
-                    else:
+                    if is_valid_email(username):
                         try:
-                            data, _ = (
-                                client.table(user_tablename)
-                                .insert({username_col: username, password_col: password})
-                                .execute()
-                            )
+                            data, _ = client.table(user_tablename).insert({username_col: username, password_col: password}).execute()
                             login_success(create_success_message, username)
                         except Exception as e:
-                            st.error(e.message)
+                            st.error(str(e))
+                    else:
+                        st.error("Please enter a valid email address.")
 
-
-        # Login to existing account
-        # Login to existing account
         with login_tab:
             with st.form(key="login"):
-                username = st.text_input(
-                    label=login_username_label,
-                    placeholder=login_username_placeholder,
-                    help=login_username_help,
-                    disabled=st.session_state["authenticated"],
-                )
-        
-                password = st.text_input(
-                    label=login_password_label,
-                    placeholder=login_password_placeholder,
-                    help=login_password_help,
-                    type="password",
-                    disabled=st.session_state["authenticated"],
-                )
-        
-                # Überprüfen, ob die Schaltfläche zum Einloggen gedrückt wurde
-                login_clicked = st.form_submit_button(
-                    label=login_submit_label,
-                    disabled=st.session_state["authenticated"],
-                    type="primary",
-                )
-        
-                # Überprüfen, ob die E-Mail gültig ist und die Schaltfläche gedrückt wurde
+                username = st.text_input(label=login_username_label, placeholder=login_username_placeholder, help=login_username_help, disabled=st.session_state["authenticated"])
+                password = st.text_input(label=login_password_label, placeholder=login_password_placeholder, help=login_password_help, type="password", disabled=st.session_state["authenticated"])
+                login_clicked = st.form_submit_button(label=login_submit_label, disabled=st.session_state["authenticated"], type="primary")
+
                 if login_clicked:
-                    if not is_valid_email(username):
-                        st.error("Please enter a valid email address.")
-                    else:
+                    if is_valid_email(username):
                         try:
-                            data, _ = (
-                                client.table(user_tablename)
-                                .select(f"{username_col}, {password_col}")
-                                .eq(username_col, username)
-                                .eq(password_col, password)
-                                .execute()
-                            )
-        
+                            data, _ = client.table(user_tablename).select(f"{username_col}, {password_col}").eq(username_col, username).eq(password_col, password).execute()
                             if len(data[-1]) > 0:
                                 login_success(login_success_message, username)
                             else:
                                 st.error(login_error_message)
                         except Exception as e:
                             st.error(str(e))
+                    else:
+                        st.error("Please enter a valid email address.")
 
-
-        # Guest login
         if allow_guest:
             with guest_tab:
-                if st.button(
-                    label=guest_submit_label,
-                    type="primary",
-                    disabled=st.session_state["authenticated"],
-                ):
+                if st.button(label=guest_submit_label, type="primary", disabled=st.session_state["authenticated"]):
                     st.session_state["authenticated"] = True
 
-        return client
-
+    return client
 
 def main() -> None:
     login_form(
@@ -227,7 +114,6 @@ def main() -> None:
         create_password_placeholder="⚠️ Password will be stored as plain text. You won't be able to recover it if you forget.",
         guest_submit_label="Play as a guest ⚠️ Scores won't be saved",
     )
-
 
 if __name__ == "__main__":
     main()
