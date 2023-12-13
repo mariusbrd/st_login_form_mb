@@ -19,8 +19,8 @@ def login_success(message: str, username: str) -> None:
 def login_form(
     title: str = "Benutzer-Verwaltung",
     user_tablename: str = "users",
-    username_col: str = "Nutzername",
-    password_col: str = "Passwort",
+    username_col: str = "username",
+    password_col: str = "password",
     create_title: str = "Registrieren :baby: ",
     login_title: str = "Login :prince: ",
     allow_guest: bool = False,
