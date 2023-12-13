@@ -73,14 +73,14 @@ def login_form(
 
                 if is_valid_email(username_raw):
                     username = username_raw
-                    st.form_submit_button(label=create_submit_label, type="primary", disabled=st.session_state["authenticated"])
-                    try:
-                        data, _ = client.table(user_tablename).insert({username_col: username, password_col: password}).execute()
-                        login_success(create_success_message, username)
-                    except Exception as e:
-                        st.error(str(e))
-                else:
-                    st.error("Please enter a valid email address.")
+                st.form_submit_button(label=create_submit_label, type="primary", disabled=st.session_state["authenticated"])
+                try:
+                    data, _ = client.table(user_tablename).insert({username_col: username, password_col: password}).execute()
+                    login_success(create_success_message, username)
+                except Exception as e:
+                    st.error(str(e))
+            else:
+                st.error("Please enter a valid email address.")
 
         with login_tab:
             with st.form(key="login"):
@@ -89,17 +89,17 @@ def login_form(
 
                 if is_valid_email(username_raw):
                     username = username_raw
-                    st.form_submit_button(label=login_submit_label, disabled=st.session_state["authenticated"], type="primary")
-                    try:
-                        data, _ = client.table(user_tablename).select(f"{username_col}, {password_col}").eq(username_col, username).eq(password_col, password).execute()
-                        if len(data[-1]) > 0:
-                            login_success(login_success_message, username)
-                        else:
-                            st.error(login_error_message)
-                    except Exception as e:
-                        st.error(str(e))
-                else:
-                    st.error("Please enter a valid email address.")
+                st.form_submit_button(label=login_submit_label, disabled=st.session_state["authenticated"], type="primary")
+                try:
+                    data, _ = client.table(user_tablename).select(f"{username_col}, {password_col}").eq(username_col, username).eq(password_col, password).execute()
+                    if len(data[-1]) > 0:
+                        login_success(login_success_message, username)
+                    else:
+                        st.error(login_error_message)
+                except Exception as e:
+                    st.error(str(e))
+            else:
+                st.error("Please enter a valid email address.")
 
         if allow_guest:
             with guest_tab:
