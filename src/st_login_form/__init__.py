@@ -6,16 +6,40 @@ from supabase import Client, create_client
 __version__ = "0.2.1"
 
 
+#@st.cache_resource
+#def init_connection() -> Client:
+#    try:
+#        SUPABASE_URL = st.secrets["SUPABASE_URL"]
+#        SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+#    except:
+#        SUPABASE_URL = os.environ.get("SUPABASE_URL")
+#        SUPABASE_KEY = os.environ.get("SUPABASE_KEY")#
+#
+#    return create_client(SUPABASE_URL, SUPABASE_KEY)
+
 @st.cache_resource
 def init_connection() -> Client:
-    try:
-        SUPABASE_URL = st.secrets["SUPABASE_URL"]
-        SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-    except:
+    # Try to get values from st.secrets
+    SUPABASE_URL = st.secrets.get("SUPABASE_URL")
+    SUPABASE_KEY = st.secrets.get("SUPABASE_KEY")
+
+    # If either value is None, use environment variables
+    if SUPABASE_URL is None or SUPABASE_KEY is None:
         SUPABASE_URL = os.environ.get("SUPABASE_URL")
         SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
+    # Ensure both SUPABASE_URL and SUPABASE_KEY are not None
+    if SUPABASE_URL is None or SUPABASE_KEY is None:
+        raise ValueError("Supabase credentials not found in secrets or environment variables")
+
     return create_client(SUPABASE_URL, SUPABASE_KEY)
+
+
+
+
+
+
+
 
 
 def login_success(message: str, username: str) -> None:
