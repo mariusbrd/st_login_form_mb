@@ -68,10 +68,11 @@ def login_form(
 
         with create_tab:
             with st.form(key="create"):
-                username = st.text_input(label=create_username_label, placeholder=create_username_placeholder, help=create_username_help, disabled=st.session_state["authenticated"])
+                username_raw = st.text_input(label=create_username_label, placeholder=create_username_placeholder, help=create_username_help, disabled=st.session_state["authenticated"])
                 password = st.text_input(label=create_password_label, placeholder=create_password_placeholder, help=create_password_help, type="password", disabled=st.session_state["authenticated"])
 
-                if is_valid_email(username):
+                if is_valid_email(username_raw):
+                    username = username_raw
                     st.form_submit_button(label=create_submit_label, type="primary", disabled=st.session_state["authenticated"])
                     try:
                         data, _ = client.table(user_tablename).insert({username_col: username, password_col: password}).execute()
@@ -83,12 +84,11 @@ def login_form(
 
         with login_tab:
             with st.form(key="login"):
-                username = st.text_input(label=login_username_label, placeholder=login_username_placeholder, help=login_username_help, disabled=st.session_state["authenticated"])
+                username_raw = st.text_input(label=login_username_label, placeholder=login_username_placeholder, help=login_username_help, disabled=st.session_state["authenticated"])
                 password = st.text_input(label=login_password_label, placeholder=login_password_placeholder, help=login_password_help, type="password", disabled=st.session_state["authenticated"])
-                login_clicked = 
 
-
-                if is_valid_email(username):
+                if is_valid_email(username_raw):
+                    username = username_raw
                     st.form_submit_button(label=login_submit_label, disabled=st.session_state["authenticated"], type="primary")
                     try:
                         data, _ = client.table(user_tablename).select(f"{username_col}, {password_col}").eq(username_col, username).eq(password_col, password).execute()
