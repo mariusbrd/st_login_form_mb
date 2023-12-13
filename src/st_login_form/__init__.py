@@ -51,7 +51,7 @@ def login_success(message: str, username: str) -> None:
 
 # Create the python function that will be called
 def login_form(
-    title: str = "Benutzer-Verwaltung",
+    title: str = "ImmoScope Benutzer-Verwaltung",
     user_tablename: str = "users",
     username_col: str = "username",
     password_col: str = "password",
