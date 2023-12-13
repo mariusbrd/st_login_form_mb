@@ -70,36 +70,36 @@ def login_form(
             with st.form(key="create"):
                 username = st.text_input(label=create_username_label, placeholder=create_username_placeholder, help=create_username_help, disabled=st.session_state["authenticated"])
                 password = st.text_input(label=create_password_label, placeholder=create_password_placeholder, help=create_password_help, type="password", disabled=st.session_state["authenticated"])
-                create_account_clicked = st.form_submit_button(label=create_submit_label, type="primary", disabled=st.session_state["authenticated"])
 
-                if create_account_clicked:
-                    if is_valid_email(username):
-                        try:
-                            data, _ = client.table(user_tablename).insert({username_col: username, password_col: password}).execute()
-                            login_success(create_success_message, username)
-                        except Exception as e:
-                            st.error(str(e))
-                    else:
-                        st.error("Please enter a valid email address.")
+                if is_valid_email(username):
+                    st.form_submit_button(label=create_submit_label, type="primary", disabled=st.session_state["authenticated"])
+                    try:
+                        data, _ = client.table(user_tablename).insert({username_col: username, password_col: password}).execute()
+                        login_success(create_success_message, username)
+                    except Exception as e:
+                        st.error(str(e))
+                else:
+                    st.error("Please enter a valid email address.")
 
         with login_tab:
             with st.form(key="login"):
                 username = st.text_input(label=login_username_label, placeholder=login_username_placeholder, help=login_username_help, disabled=st.session_state["authenticated"])
                 password = st.text_input(label=login_password_label, placeholder=login_password_placeholder, help=login_password_help, type="password", disabled=st.session_state["authenticated"])
-                login_clicked = st.form_submit_button(label=login_submit_label, disabled=st.session_state["authenticated"], type="primary")
+                login_clicked = 
 
-                if login_clicked:
-                    if is_valid_email(username):
-                        try:
-                            data, _ = client.table(user_tablename).select(f"{username_col}, {password_col}").eq(username_col, username).eq(password_col, password).execute()
-                            if len(data[-1]) > 0:
-                                login_success(login_success_message, username)
-                            else:
-                                st.error(login_error_message)
-                        except Exception as e:
-                            st.error(str(e))
-                    else:
-                        st.error("Please enter a valid email address.")
+
+                if is_valid_email(username):
+                    st.form_submit_button(label=login_submit_label, disabled=st.session_state["authenticated"], type="primary")
+                    try:
+                        data, _ = client.table(user_tablename).select(f"{username_col}, {password_col}").eq(username_col, username).eq(password_col, password).execute()
+                        if len(data[-1]) > 0:
+                            login_success(login_success_message, username)
+                        else:
+                            st.error(login_error_message)
+                    except Exception as e:
+                        st.error(str(e))
+                else:
+                    st.error("Please enter a valid email address.")
 
         if allow_guest:
             with guest_tab:
