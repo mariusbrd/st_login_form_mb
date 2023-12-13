@@ -7,8 +7,8 @@ __version__ = "0.2.1"
 @st.cache_resource
 def init_connection() -> Client:
     try:
-        SUPABASE_URL = os.eniron.get("SUPABASE_URL")
-        SUPABASE_KEY = os.eniron.get("SUPABASE_KEY")
+        SUPABASE_URL = os.environ.get("SUPABASE_URL")
+        SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
     except:
         SUPABASE_URL = st.secrets["SUPABASE_URL"]
         SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
