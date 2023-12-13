@@ -135,14 +135,14 @@ def login_form(
                     type="password",
                     disabled=st.session_state["authenticated"],
                 )
-
-                if st.form_submit_button(
-                    label=create_submit_label,
-                    type="primary",
-                    disabled=st.session_state["authenticated"],
-                ):
-                    if not is_valid_email(username):
-                        st.error("Please enter a valid email address.")
+                if not is_valid_email(username):
+                    st.error("Please enter a valid email address.")
+                else:
+                    if st.form_submit_button(
+                        label=create_submit_label,
+                        type="primary",
+                        disabled=st.session_state["authenticated"],
+                    ):
                     else:
                         try:
                             data, _ = (
@@ -172,15 +172,16 @@ def login_form(
                     type="password",
                     disabled=st.session_state["authenticated"],
                 )
-
-                if st.form_submit_button(
+                if not is_valid_email(username):
+                    st.error("Please enter a valid email address.")
+                else:
+                    if st.form_submit_button(
                     label=login_submit_label,
                     disabled=st.session_state["authenticated"],
                     type="primary",
-                ):
-                    if not is_valid_email(username):
-                        st.error("Please enter a valid email address.")
+                    ):
                     else:
+     
                         data, _ = (
                             client.table(user_tablename)
                             .select(f"{username_col}, {password_col}")
