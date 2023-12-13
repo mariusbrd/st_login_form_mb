@@ -1,6 +1,7 @@
+import os
 import streamlit as st
 from supabase import Client, create_client 
-import os
+
 
 __version__ = "0.2.1"
 
@@ -8,17 +9,12 @@ __version__ = "0.2.1"
 @st.cache_resource
 def init_connection() -> Client:
     try:
-        SUPABASE_URL = os.environ.get("SUPABASE_URL")
-        SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-    except:
         SUPABASE_URL = st.secrets["SUPABASE_URL"]
         SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
+    except:
+        SUPABASE_URL = os.environ.get("SUPABASE_URL")
+        SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-        
-
-
-
-    
     return create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
