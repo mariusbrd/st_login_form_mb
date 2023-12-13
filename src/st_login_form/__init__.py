@@ -119,6 +119,7 @@ def login_form(
             )
 
         # Create new account
+        # Create new account
         with create_tab:
             with st.form(key="create"):
                 username = st.text_input(
@@ -127,7 +128,7 @@ def login_form(
                     help=create_username_help,
                     disabled=st.session_state["authenticated"],
                 )
-
+        
                 password = st.text_input(
                     label=create_password_label,
                     placeholder=create_password_placeholder,
@@ -135,14 +136,18 @@ def login_form(
                     type="password",
                     disabled=st.session_state["authenticated"],
                 )
-                if not is_valid_email(username):
-                    st.error("Please enter a valid email address.")
-                else:
-                    if st.form_submit_button(
-                        label=create_submit_label,
-                        type="primary",
-                        disabled=st.session_state["authenticated"],
-                    ):
+        
+                # Überprüfen, ob die Schaltfläche zum Erstellen eines Kontos gedrückt wurde
+                create_account_clicked = st.form_submit_button(
+                    label=create_submit_label,
+                    type="primary",
+                    disabled=st.session_state["authenticated"],
+                )
+        
+                # Überprüfen, ob die E-Mail gültig ist und die Schaltfläche gedrückt wurde
+                if create_account_clicked:
+                    if not is_valid_email(username):
+                        st.error("Please enter a valid email address.")
                     else:
                         try:
                             data, _ = (
@@ -150,10 +155,10 @@ def login_form(
                                 .insert({username_col: username, password_col: password})
                                 .execute()
                             )
+                            login_success(create_success_message, username)
                         except Exception as e:
                             st.error(e.message)
-                        else:
-                            login_success(create_success_message, username)
+
 
         # Login to existing account
         with login_tab:
