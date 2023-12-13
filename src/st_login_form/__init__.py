@@ -1,6 +1,7 @@
 import os
 import streamlit as st
 from supabase import Client, create_client 
+import re
 
 
 __version__ = "0.2.1"
@@ -39,7 +40,9 @@ def init_connection() -> Client:
 
 
 
-
+def is_valid_email(email: str) -> bool:
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    return re.match(pattern, email) is not None
 
 
 
@@ -138,16 +141,19 @@ def login_form(
                     type="primary",
                     disabled=st.session_state["authenticated"],
                 ):
-                    try:
-                        data, _ = (
-                            client.table(user_tablename)
-                            .insert({username_col: username, password_col: password})
-                            .execute()
-                        )
-                    except Exception as e:
-                        st.error(e.message)
+                    if not is_valid_email(username):
+                        st.error("Please enter a valid email address.")
                     else:
-                        login_success(create_success_message, username)
+                        try:
+                            data, _ = (
+                                client.table(user_tablename)
+                                .insert({username_col: username, password_col: password})
+                                .execute()
+                            )
+                        except Exception as e:
+                            st.error(e.message)
+                        else:
+                            login_success(create_success_message, username)
 
         # Login to existing account
         with login_tab:
@@ -172,18 +178,21 @@ def login_form(
                     disabled=st.session_state["authenticated"],
                     type="primary",
                 ):
-                    data, _ = (
-                        client.table(user_tablename)
-                        .select(f"{username_col}, {password_col}")
-                        .eq(username_col, username)
-                        .eq(password_col, password)
-                        .execute()
-                    )
-
-                    if len(data[-1]) > 0:
-                        login_success(login_success_message, username)
+                    if not is_valid_email(username):
+                        st.error("Please enter a valid email address.")
                     else:
-                        st.error(login_error_message)
+                        data, _ = (
+                            client.table(user_tablename)
+                            .select(f"{username_col}, {password_col}")
+                            .eq(username_col, username)
+                            .eq(password_col, password)
+                            .execute()
+                        )
+    
+                        if len(data[-1]) > 0:
+                            login_success(login_success_message, username)
+                        else:
+                            st.error(login_error_message)
 
         # Guest login
         if allow_guest:
