@@ -161,6 +161,7 @@ def login_form(
 
 
         # Login to existing account
+        # Login to existing account
         with login_tab:
             with st.form(key="login"):
                 username = st.text_input(
@@ -169,7 +170,7 @@ def login_form(
                     help=login_username_help,
                     disabled=st.session_state["authenticated"],
                 )
-
+        
                 password = st.text_input(
                     label=login_password_label,
                     placeholder=login_password_placeholder,
@@ -177,28 +178,35 @@ def login_form(
                     type="password",
                     disabled=st.session_state["authenticated"],
                 )
-                if not is_valid_email(username):
-                    st.error("Please enter a valid email address.")
-                else:
-                    if st.form_submit_button(
+        
+                # Überprüfen, ob die Schaltfläche zum Einloggen gedrückt wurde
+                login_clicked = st.form_submit_button(
                     label=login_submit_label,
                     disabled=st.session_state["authenticated"],
                     type="primary",
-                    ):
+                )
+        
+                # Überprüfen, ob die E-Mail gültig ist und die Schaltfläche gedrückt wurde
+                if login_clicked:
+                    if not is_valid_email(username):
+                        st.error("Please enter a valid email address.")
                     else:
-     
-                        data, _ = (
-                            client.table(user_tablename)
-                            .select(f"{username_col}, {password_col}")
-                            .eq(username_col, username)
-                            .eq(password_col, password)
-                            .execute()
-                        )
-    
-                        if len(data[-1]) > 0:
-                            login_success(login_success_message, username)
-                        else:
-                            st.error(login_error_message)
+                        try:
+                            data, _ = (
+                                client.table(user_tablename)
+                                .select(f"{username_col}, {password_col}")
+                                .eq(username_col, username)
+                                .eq(password_col, password)
+                                .execute()
+                            )
+        
+                            if len(data[-1]) > 0:
+                                login_success(login_success_message, username)
+                            else:
+                                st.error(login_error_message)
+                        except Exception as e:
+                            st.error(str(e))
+
 
         # Guest login
         if allow_guest:
