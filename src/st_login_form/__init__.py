@@ -25,7 +25,7 @@ def login_form(
     login_title: str = "Login :prince: ",
     allow_guest: bool = False,
     guest_title: str = "Gäste :ninja: ",
-    create_username_label: str = "Benutzer definieren",
+    create_username_label: str = "Email-Adresse",
     create_username_placeholder: str = None,
     create_username_help: str = None,
     create_password_label: str = "Passwort erstellen",
